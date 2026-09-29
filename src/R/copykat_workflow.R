@@ -1,3 +1,5 @@
+# 公共入口可被项目 workflow 调用，也可直接作为 CLI 运行。
+main <- function(cli_args = commandArgs(trailingOnly = TRUE)) {
 #!/usr/bin/env Rscript
 
 # CopyKAT 独立分析入口
@@ -6,9 +8,9 @@
 
 # 功能：读取 --name value 形式的命令行参数。
 arg_value <- function(name, default = NULL) {
-  args <- commandArgs(trailingOnly = TRUE)
-  index <- match(name, args)
-  if (is.na(index) || index == length(args)) default else args[[index + 1L]]
+  args <- cli_args
+  index <- tail(which(args == name), 1L)
+  if (!length(index) || index == length(args)) default else args[[index + 1L]]
 }
 
 # 功能：把逗号分隔的正常参考细胞类型转换为字符向量。
@@ -135,7 +137,7 @@ run_copykat <- function(
   write.csv(prediction, file.path(output_dir, "copykat_predictions_all_samples.csv"), row.names = FALSE)
 
   obj$copykat_prediction <- prediction$copykat_prediction[match(colnames(obj), prediction$cell)]
-  saveRDS(obj, file.path(output_dir, "copykat_annotated.rds"))
+  saveRDS(obj, file.path(object_dir, "copykat_annotated.rds"))
 
   if ("umap" %in% Seurat::Reductions(obj)) {
     plot <- Seurat::DimPlot(
@@ -168,6 +170,8 @@ run_copykat <- function(
 
 input_rds <- arg_value("--input")
 output_dir <- arg_value("--output")
+object_dir <- arg_value("--object-dir", file.path("data/processed", "copykat"))
+dir.create(object_dir, recursive = TRUE, showWarnings = FALSE)
 if (is.null(input_rds) || is.null(output_dir)) {
   stop("用法：Rscript copykat_workflow.R --input annotated.rds --output results/copykat --sample-col orig.ident")
 }
@@ -187,3 +191,6 @@ run_copykat(
   distance = arg_value("--distance", "euclidean"),
   n_cores = as.integer(arg_value("--cores", "8"))
 )
+
+}
+if (sys.nframe() == 0L) main()

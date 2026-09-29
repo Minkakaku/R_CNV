@@ -1,0 +1,10 @@
+name: r-cnv
+channels:
+- conda-forge
+- bioconda
+dependencies:
+- r-base>=4.3
+- r-seurat>=5
+- r-copykat
+- bioconductor-infercnv
+- r-yaml

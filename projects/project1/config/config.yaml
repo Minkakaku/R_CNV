@@ -1,0 +1,12 @@
+methods:
+  copykat:
+    input: data/processed/annotated.rds
+    references: T cell,B cell
+    output: results/10_copykat
+    object-dir: data/processed/copykat
+  infercnv:
+    input: data/processed/annotated.rds
+    gene-order: data/reference/gene_order.tsv
+    references: T cell,B cell
+    output: results/11_infercnv
+    object-dir: data/processed/infercnv
